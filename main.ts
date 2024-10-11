@@ -43,8 +43,11 @@ async function ensureSingleProcess() {
     const processFilePath = ".process.pid"
     if (await exists(processFilePath)) {
         const oldPid = Number.parseInt(await Deno.readTextFile(processFilePath)).toString()
-        const response = await new Deno.Command("kill", { args: ["-0", oldPid] }).output()
-        if (response.code == 0) {
+        const killResponse = await new Deno.Command("kill", { args: ["-0", oldPid] }).output()
+        if (killResponse.code == 0) {
+            const psResponse = await new Deno.Command("ps", { args: ["-p", oldPid] }).output()
+            const processInfo = new TextDecoder().decode(psResponse.stdout)
+            if (!processInfo.includes("deno")) return
             const timeout = setTimeout(() => {
                 console.error("Did not answer in time. Aborting this process.")
                 Deno.exit(1)

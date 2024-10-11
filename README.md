@@ -1,7 +1,7 @@
 # Lecture Downloader
 
-This is a server utility written in [deno](https://deno.com/) to download lectures streamed with the
-hls protocol.
+This is a server utility written in [deno](https://deno.com/) to automatically
+download lectures streamed with the hls protocol.
 
 To configure this to your needs, modify the `tasks.json` file:
 
