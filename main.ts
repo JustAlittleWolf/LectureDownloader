@@ -22,7 +22,7 @@ for (const task of dailyTasks) {
     setTimeout(() => startTask(task), timeout)
     taskCount++
 }
-console.log(`Scheduled ${taskCount} task(s) for today`)
+console.log(`${new Date().toLocaleString()} Scheduled ${taskCount} task(s) for today`)
 
 function startTask(task: target) {
     const currentDate = new Date()
