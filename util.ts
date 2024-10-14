@@ -98,35 +98,41 @@ export async function record(videoURL: string, durationSeconds: number, saveFile
     }, durationSeconds * 1000)
 
     function downloadChunks() {
-        fetch(chunklistURL).then(it => it.text()).then(chunklist => {
-            const currentSeconds = Math.floor(Date.now() / 1_000)
+        try {
+            fetch(chunklistURL).then(it => it.text()).then(chunklist => {
+                try {
+                    const currentSeconds = Math.floor(Date.now() / 1_000)
 
-            for (const chunk of chunkCache) {
-                const chunkAgeSeconds = currentSeconds - (chunkAge.get(chunk) || chunkCacheSeconds * 10)
-                if (chunkAgeSeconds < chunkCacheSeconds) continue
-                chunkCache.delete(chunk)
-                chunkAge.delete(chunk)
-            }
+                    for (const chunk of chunkCache) {
+                        const chunkAgeSeconds = currentSeconds - (chunkAge.get(chunk) || chunkCacheSeconds * 10)
+                        if (chunkAgeSeconds < chunkCacheSeconds) continue
+                        chunkCache.delete(chunk)
+                        chunkAge.delete(chunk)
+                    }
 
-            const chunks = chunklist.replaceAll("\r", "").split("\n").filter(it =>
-                !it.startsWith("#") &&
-                it.length != 0 &&
-                it.endsWith(".ts") &&
-                !chunkCache.has(it)
-            )
+                    const chunks = chunklist.replaceAll("\r", "").split("\n").filter(it =>
+                        !it.startsWith("#") &&
+                        it.length != 0 &&
+                        it.endsWith(".ts") &&
+                        !chunkCache.has(it)
+                    )
 
-            for (const chunk of chunks) {
-                chunkCache.add(chunk)
-                chunkAge.set(chunk, currentSeconds)
-            }
+                    for (const chunk of chunks) {
+                        chunkCache.add(chunk)
+                        chunkAge.set(chunk, currentSeconds)
+                    }
 
-            writeChunks(chunks)
-        })
+                    writeChunks(chunks)
+                } catch (e) { console.error("Error while downloading chunks: " + e) }
+            })
+        } catch (e) { console.error("Error while downloading chunks: " + e) }
     }
 
     async function writeChunks(chunks: string[]) {
         for (const chunk of chunks) {
-            await writeChunk(chunk)
+            try {
+                await writeChunk(chunk)
+            } catch (e) { console.error("Error while writing chunk: " + e) }
         }
         saveFile.syncData()
     }

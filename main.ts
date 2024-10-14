@@ -31,11 +31,13 @@ function startTask(task: target) {
     const taskExecuteSecond = getDurationSeconds(task.start.time)
     const taskDurationSeconds = taskTotalDurationSeconds - Math.max(0, secondsInDay - taskExecuteSecond)
     if (taskDurationSeconds < 0) return
-    record(
-        tasks.sources[task.source],
-        taskDurationSeconds,
-        `${tasks.outDirectory}/${task.name}/${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}_${task.start.time.replaceAll(":", "-")}.mp4`
-    )
+    try {
+        record(
+            tasks.sources[task.source],
+            taskDurationSeconds,
+            `${tasks.outDirectory}/${task.name}/${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}_${task.start.time.replaceAll(":", "-")}.mp4`
+        )
+    } catch (e) { console.error("Error during recording task: " + e)}
 }
 
 async function ensureSingleProcess() {
