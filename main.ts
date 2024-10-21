@@ -35,7 +35,7 @@ function startTask(task: target) {
         record(
             tasks.sources[task.source],
             taskDurationSeconds,
-            `${tasks.outDirectory}/${task.name}/${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}_${task.start.time.replaceAll(":", "-")}.mp4`
+            `${tasks.outDirectory}/${task.name}/${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}_${task.start.time.replaceAll(":", "-")}.mp4`
         )
     } catch (e) { console.error("Error during recording task: " + e)}
 }
