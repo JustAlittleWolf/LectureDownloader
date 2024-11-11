@@ -85,6 +85,7 @@ export async function record(videoURL: string, durationSeconds: number, saveFile
 
     await ensureDir(saveFilePath.substring(0, saveFilePath.lastIndexOf("/")))
     const saveFile = await Deno.open(saveFilePath, { create: true, append: true })
+    let isFileOpen = true
 
     console.log(`\n${new Date().toLocaleString()} Starting recording task\nSource: \t${videoURL}\nDuration: \t${durationSeconds}s\nOutfile: \t${saveFilePath}`)
 
@@ -93,8 +94,11 @@ export async function record(videoURL: string, durationSeconds: number, saveFile
 
     setTimeout(() => {
         clearInterval(downloadTask)
-        saveFile.close()
-        console.log(`\n${new Date().toLocaleString()} Completed recording task\nView in ${saveFilePath}`)
+        isFileOpen = false
+        setTimeout(() => {
+            saveFile.close()
+            console.log(`\n${new Date().toLocaleString()} Completed recording task\nView in ${saveFilePath}`)
+        }, 2000)
     }, durationSeconds * 1000)
 
     function downloadChunks() {
@@ -134,7 +138,7 @@ export async function record(videoURL: string, durationSeconds: number, saveFile
                 await writeChunk(chunk)
             } catch (e) { console.error("Error while writing chunk: " + e) }
         }
-        saveFile.syncData()
+        if (isFileOpen) saveFile.syncData()
     }
 
     async function writeChunk(chunk: string) {
@@ -142,7 +146,7 @@ export async function record(videoURL: string, durationSeconds: number, saveFile
         const streamReader = response.body?.getReader()
         if (streamReader) {
             const reader = readerFromStreamReader(streamReader)
-            await copy(reader, saveFile)
+            if (isFileOpen) await copy(reader, saveFile)
         } else {
             console.error(`Error writing chunk ${chunk} for recording ${saveFilePath}: streamReader is null`)
         }
