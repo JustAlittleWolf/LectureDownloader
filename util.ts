@@ -101,9 +101,9 @@ export async function record(videoURL: string, durationSeconds: number, saveFile
         }, 2000)
     }, durationSeconds * 1000)
 
-    function downloadChunks() {
+    async function downloadChunks() {
         try {
-            fetch(chunklistURL).then(it => it.text()).then(chunklist => {
+            await fetch(chunklistURL).then(it => it.text()).then(chunklist => {
                 try {
                     const currentSeconds = Math.floor(Date.now() / 1_000)
 
